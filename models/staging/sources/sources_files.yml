@@ -1,0 +1,26 @@
+version: 2
+sources:
+  - name: sources
+    description: source raw data
+    database: MYDB
+    schema: PRACTICEPOC
+    tables:
+      - name: hier_clnd
+        description: main calendar reference table
+        
+        columns:
+          - name: fscldt_id
+            description: calendar date
+            tests: 
+              - unique
+              - not_null
+
+      - name: fact_transactions
+        description: main lineitem table
+        columns:
+          - name: fscldt_id
+            description: Foreign Key to hier_clnd_fscldt_id
+            tests:
+              - relationships:
+                  to: source('PRACTICEPOC', 'hier_clnd')
+                  field: fscldt_id
