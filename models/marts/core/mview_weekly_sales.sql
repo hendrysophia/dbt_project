@@ -8,7 +8,7 @@ with
         select
             pos_site_id,
             sku_id,
-            t2.week_id,
+            t2.week_label,
             price_substate_id,
             type,
             sum(sales_units),
@@ -16,9 +16,9 @@ with
             sum(discount_dollars)
         from transactions t1
         join orders as t2 on t1.date_id = t2.date_id
-        group by pos_site_id, sku_id, t2.week_id, price_substate_id, type
+        group by pos_site_id, sku_id, t2.week_label, price_substate_id, type
 
     )
 select *
 from weekly_sales_summary
-order by week_id
+order by week_label
