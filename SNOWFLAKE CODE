@@ -1,0 +1,293 @@
+-- Create a storage integration object to load source files from azure blob storage containers
+CREATE STORAGE INTEGRATION snowflake_azure_intg
+  TYPE = EXTERNAL_STAGE
+  STORAGE_PROVIDER = AZURE
+  ENABLED = TRUE
+  AZURE_TENANT_ID = '0c0453b6-89a1-4cc9-931b-2b31cf67d944'
+  STORAGE_ALLOWED_LOCATIONS = ('azure://snowflakeazureintg.blob.core.windows.net/snowflakeazurepractice');
+  
+-- Describe integration object
+DESC STORAGE INTEGRATION snowflake_azure_intg;
+
+-----------------------------------
+// Create database and schema
+CREATE DATABASE IF NOT EXISTS MYDB;
+CREATE SCHEMA IF NOT EXISTS MYDB.file_formats;
+CREATE SCHEMA IF NOT EXISTS MYDB.external_stages;
+
+// Create file format object
+CREATE OR REPLACE file format mydb.file_formats.csv_fileformat
+    type = csv
+    field_delimiter = '|'
+    skip_header = 1
+    null_if = ('null','\\N','NULL')
+    empty_field_as_null = TRUE;
+
+    
+// Create stage object with integration object & file format object
+CREATE OR REPLACE STAGE mydb.external_stages.stg_azure_cont
+    URL = 'azure://snowflakeazureintg.blob.core.windows.net/snowflakeazurepractice'
+    STORAGE_INTEGRATION = snowflake_azure_intg
+    FILE_FORMAT = mydb.file_formats.csv_fileformat ;
+
+
+//Listing files under your azure containers
+list @mydb.external_stages.stg_azure_cont;
+
+-- 1. hier_pricestate --> substate_id|substate_label|state_id|state_label
+// Create a table first
+CREATE OR REPLACE TABLE mydb.practicepoc.hier_pricestate
+(
+   substate_id varchar not null primary key,
+   substate_label varchar not null,
+   state_id varchar not null,
+   state_label varchar not null
+); 
+
+desc table hier_pricestate;
+
+// Use Copy command to load the files
+COPY INTO mydb.practicepoc.hier_pricestate
+    FROM @mydb.external_stages.stg_azure_cont
+    PATTERN = '.*pricestate.*';
+    --validation_mode = return_all_errors;
+
+    
+-- 2. hier_rtlloc --> str|str_label|dstr|dstr_label|rgn|rgn_label
+// Create a table first
+CREATE OR REPLACE TABLE mydb.practicepoc.hier_rtlloc
+(
+   str integer not null primary key,
+   str_label varchar not null,
+   dstr integer not null,
+   dstr_label varchar not null,
+   rgn integer not null,
+   rgn_label varchar not null
+); 
+
+desc table hier_rtlloc;
+
+// Use Copy command to load the files
+COPY INTO mydb.practicepoc.hier_rtlloc
+    FROM @mydb.external_stages.stg_azure_cont
+    PATTERN = '.*rtlloc.*'; 
+  
+-- 3. hier_prod --> sku_id|sku_label|stylclr_id|stylclr_label|styl_id|styl_label|subcat_id|subcat_label|cat_id|cat_label|dept_id|dept_label|issvc|isasmbly|isnfs
+
+// Create a table first
+CREATE OR REPLACE TABLE mydb.practicepoc.hier_prod
+(
+   sku_id varchar not null primary key ,
+   sku_label varchar not null,
+   stylclr_id varchar not null,
+   stylclr_label varchar not null,
+   styl_id varchar not null,
+   styl_label varchar not null,
+   subcat_id integer not null,
+   subcat_label varchar not null,
+   cat_id integer not null,
+   cat_label varchar not null,
+   dept_id integer not null,
+   dept_label varchar not null,
+   issvc integer not null,
+   isasmbly integer not null,
+   isnfs integer not null
+); 
+
+desc table hier_prod;
+
+// Use Copy command to load the files
+COPY INTO mydb.practicepoc.hier_prod
+    FROM @mydb.external_stages.stg_azure_cont
+    PATTERN = '.*prod.*';
+    --validation_mode = return_all_errors;  
+    
+-- 4. hier_possite --> site_id|site_label|subchnl_id|subchnl_label|chnl_id|chnl_label
+
+// Create a table first
+CREATE OR REPLACE TABLE mydb.practicepoc.hier_possite
+(
+   site_id STRING not null primary key,
+   site_label STRING not null,
+   subchnl_id STRING not null,
+   subchnl_label STRING not null, 
+   chnl_id STRING not null,
+   chnl_label STRING not null
+); 
+
+desc table hier_possite;
+
+// Use Copy command to load the files
+COPY INTO mydb.practicepoc.hier_possite
+    FROM @mydb.external_stages.stg_azure_cont
+    PATTERN = '.*possite.*';
+    --validation_mode = return_all_errors
+
+
+-- 5. hier_invstatus --> code_id|code_label|bckt_id|bckt_label|ownrshp_id|ownrshp_label
+
+// Create a table first
+CREATE OR REPLACE TABLE mydb.practicepoc.hier_invstatus
+(
+   code_id STRING not null primary key,
+   code_label STRING not null,
+   bckt_id STRING not null,
+   bckt_label STRING not null,
+   ownrshp_id STRING not null,
+   ownrshp_label STRING not null
+); 
+
+desc table hier_invstatus;
+
+// Use Copy command to load the files
+COPY INTO mydb.practicepoc.hier_invstatus
+    FROM @mydb.external_stages.stg_azure_cont
+    PATTERN = '.*invstatus.*';
+    --validation_mode = return_all_errors;
+
+    
+-- 6. hier_invloc --> loc|loc_label|loctype|loctype_label
+
+// Create a table first
+CREATE OR REPLACE TABLE mydb.practicepoc.hier_invloc
+(
+   loc integer not null primary key,
+   loc_label STRING not null,
+   loctype STRING not null,
+   loctype_label STRING not null
+); 
+
+desc table hier_invloc;
+
+// Use Copy command to load the files
+COPY INTO mydb.practicepoc.hier_invloc
+    FROM @mydb.external_stages.stg_azure_cont
+    PATTERN = '.*invloc.*';
+    --validation_mode = return_all_errors;
+    
+
+-- 7. hier_hldy --> hldy_id|hldy_label
+
+// Create a table first
+CREATE OR REPLACE TABLE mydb.practicepoc.hier_hldy
+(
+   hldy_id STRING not null primary key,
+   hldy_label STRING not null
+); 
+
+desc table hier_hldy;
+
+// Use Copy command to load the files
+COPY INTO mydb.practicepoc.hier_hldy
+    FROM @mydb.external_stages.stg_azure_cont
+    PATTERN = '.*hldy.*';
+    --validation_mode = return_all_errors;
+
+ 
+-- 8. hier_clnd --> fscldt_id|fscldt_label|fsclwk_id|fsclwk_label|fsclmth_id|fsclmth_label|fsclqrtr_id|fsclqrtr_label|fsclyr_id|fsclyr_label|ssn_id|ssn_label|ly_fscldt_id|lly_fscldt_id|fscldow|fscldom|fscldoq|fscldoy|fsclwoy|fsclmoy|fsclqoy|date
+
+// Create a table first
+CREATE OR REPLACE TABLE mydb.practicepoc.hier_clnd
+(
+   fscldt_id string not null primary key,
+   fscldt_label STRING not null,
+   fsclwk_id STRING not null,
+   fsclwk_label STRING not null,
+   fsclmth_id STRING not null,
+   fsclmth_label STRING not null,
+   fsclqrtr_id STRING not null,
+   fsclqrtr_label STRING not null,
+   fsclyr_id STRING not null,
+   fsclyr_label STRING not null,
+   ssn_id STRING not null,
+   ssn_label STRING not null,
+   ly_fscldt_id STRING not null,
+   lly_fscldt_id STRING not null,
+   fscldow STRING not null,
+   fscldom STRING not null,
+   fscldoq STRING not null,
+   fscldoy STRING not null,
+   fsclwoy STRING not null,
+   fsclmoy STRING not null,
+   fsclqoy STRING not null,
+   date date not null 
+); 
+
+desc table hier_clnd;
+
+// Use Copy command to load the files
+COPY INTO mydb.practicepoc.hier_clnd
+    FROM @mydb.external_stages.stg_azure_cont
+    PATTERN = '.*clnd.*';
+    --validation_mode = return_all_errors;
+
+
+-- 9. fact_averagecosts --> fscldt_id|sku_id|average_unit_standardcost|average_unit_landedcost
+
+
+// Create a table first
+CREATE OR REPLACE TABLE mydb.practicepoc.fact_averagecosts
+(
+   fscldt_id STRING not null,
+   sku_id varchar not null,
+   average_unit_standardcost STRING not null,
+   average_unit_landedcost STRING not null
+); 
+
+ALTER TABLE mydb.practicepoc.fact_averagecosts ADD CONSTRAINT fk_fscldt FOREIGN KEY (fscldt_id) REFERENCES mydb.practicepoc.hier_clnd (fscldt_id);
+ALTER TABLE mydb.practicepoc.fact_averagecosts ADD CONSTRAINT fk_sku FOREIGN KEY (sku_id) REFERENCES mydb.practicepoc.hier_prod (sku_id);
+
+desc table fact_averagecosts;
+
+// Use Copy command to load the files
+COPY INTO mydb.practicepoc.fact_averagecosts
+    FROM @mydb.external_stages.stg_azure_cont
+    PATTERN = '.*averagecosts.*';
+    --validation_mode = return_all_errors;
+    
+
+-- 10. fact_transactions --> order_id|line_id|type|dt|pos_site_id|sku_id|fscldt_id|price_substate_id|sales_units|sales_dollars|discount_dollars|original_order_id|original_line_id
+
+// Create a table first
+CREATE OR REPLACE TABLE mydb.practicepoc.fact_transactions
+(
+   order_id integer not null primary key,
+   line_id integer not null,
+   type STRING not null,
+   dt TIMESTAMP_NTZ not null,
+   pos_site_id STRING not null,
+   sku_id varchar not null,
+   fscldt_id STRING not null,
+   price_substate_id varchar not null,
+   sales_units integer not null,
+   sales_dollars number(20,2),
+   discount_dollars number(20,2),
+   original_order_id integer,
+   original_line_id integer
+); 
+
+ALTER TABLE mydb.practicepoc.fact_transactions ADD CONSTRAINT fk_fscldt FOREIGN KEY (fscldt_id) REFERENCES mydb.practicepoc.hier_clnd (fscldt_id);
+ALTER TABLE mydb.practicepoc.fact_transactions ADD CONSTRAINT fk_sku FOREIGN KEY (sku_id) REFERENCES mydb.practicepoc.hier_prod (sku_id);
+ALTER TABLE mydb.practicepoc.fact_transactions ADD CONSTRAINT fk_siteid FOREIGN KEY (pos_site_id) REFERENCES mydb.practicepoc.hier_possite (site_id);
+ALTER TABLE mydb.practicepoc.fact_transactions ADD CONSTRAINT fk_pricesubstate FOREIGN KEY (price_substate_id) REFERENCES mydb.practicepoc.hier_pricestate (substate_id);
+
+desc table fact_transactions;
+
+// Use Copy command to load the files
+COPY INTO mydb.practicepoc.fact_transactions
+    FROM @mydb.external_stages.stg_azure_cont
+    PATTERN = '.*transactions.*';
+    --validation_mode = return_all_errors;
+
+    
+//Validate the data
+SELECT * FROM mydb.practicepoc.hier_pricestate;
+SELECT * FROM mydb.practicepoc.hier_rtlloc;
+SELECT * FROM mydb.practicepoc.hier_prod;
+SELECT * FROM mydb.practicepoc.hier_possite;
+SELECT * FROM mydb.practicepoc.hier_invstatus;
+SELECT * FROM mydb.practicepoc.hier_invloc;
+SELECT * FROM mydb.practicepoc.hier_hldy;
+SELECT * FROM mydb.practicepoc.hier_clnd;
+SELECT * FROM mydb.practicepoc.fact_averagecosts;
+SELECT * FROM mydb.practicepoc.fact_transactions;
