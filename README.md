@@ -49,11 +49,11 @@ Load source data files (dimensional and fact tables) into SnowFlake's data wareh
 
    ![image](https://github.com/hendrysophia/dbt_project/assets/22212468/1802e3eb-86bf-4f5e-91cc-0e8c9c2b01f2)
 
-2. Create a data wareshouse in snowflake:
+2. Create a data warehouse in snowflake:
 
    I have created a trial snowflake account with XS DWH size
 
-   ![image](https://github.com/hendrysophia/dbt_project/assets/22212468/1c46213c-8999-458c-a45a-fcfa7d02fcd7)
+   ![image](https://github.com/hendrysophia/dbt_project/assets/22212468/0030a3e3-3dfc-4c4d-aa9b-32e4592dfbd5)
 
 3.Create a database to store data, also setup external stages and file formats 
 
