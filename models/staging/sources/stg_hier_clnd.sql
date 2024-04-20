@@ -26,7 +26,7 @@ with
             fsclwoy,
             fsclmoy,
             fsclqoy,
-            [date] as dt
+            date as dt
 
         from source
 

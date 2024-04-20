@@ -12,6 +12,7 @@ with
     weekly_sales_summary as (
 
         select
+        max(t2.dt),
             t1.pos_site_id,
             t1.sku_id,
             t2.week_label,
