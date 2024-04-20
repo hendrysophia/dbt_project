@@ -1,22 +1,92 @@
 version: 2
 sources:
   - name: sources
-    description: source raw data
+    description: source data
     database: MYDB
     schema: PRACTICEPOC
     tables:
       - name: hier_clnd
-        description: main calendar reference table
-        
+        description: fiscal calendar table
+
         columns:
           - name: fscldt_id
             description: calendar date
-            tests: 
+            tests:
               - unique
               - not_null
 
-      - name: fact_transactions
-        description: main lineitem table
+      - name: hier_hldy
+        description: fiscal holiday calendar table
+
+        columns:
+          - name: hldy_id
+            description: holiday date
+            tests:
+              - unique
+              - not_null
+
+      - name: hier_invloc
+        description: line of control table
+
+        columns:
+          - name: loc
+            description: loc id
+            tests:
+              - unique
+              - not_null
+
+      - name: hier_invstatus
+        description: inventory status code
+
+        columns:
+          - name: code_id
+            description: code status id
+            tests:
+              - unique
+              - not_null
+
+      - name: hier_possite
+        description: point of sale
+
+        columns:
+          - name: site_id
+            description: site id
+            tests:
+              - unique
+              - not_null
+
+      - name: hier_pricestate
+        description: price state
+
+        columns:
+          - name: substate_id
+            description: price type id
+            tests:
+              - unique
+              - not_null
+
+      - name: hier_prod
+        description: SKU - stock keeping unit
+
+        columns:
+          - name: sku_id
+            description: sku id
+            tests:
+              - unique
+              - not_null
+
+      - name: hier_rtlloc
+        description: Location
+
+        columns:
+          - name: str
+            description: street/district/region
+            tests:
+              - unique
+              - not_null
+
+      - name: fact_averagecosts
+        description: average cost fact data
         columns:
           - name: fscldt_id
             description: Foreign Key to hier_clnd_fscldt_id
@@ -24,3 +94,37 @@ sources:
               - relationships:
                   to: source('PRACTICEPOC', 'hier_clnd')
                   field: fscldt_id
+          - name: sku_id
+            description: Foreign Key to hier_prod_sku_id
+            tests:
+              - relationships:
+                  to: source('PRACTICEPOC', 'hier_prod')
+                  field: sku_id
+
+      - name: fact_transactions
+        description: main lineitem table
+        columns:
+          - name: pos_site_id
+            description: Foreign Key to hier_possite_site_id
+            tests:
+              - relationships:
+                  to: source('PRACTICEPOC', 'hier_possite')
+                  field: site_id
+          - name: sku_id
+            description: Foreign Key to hier_prod_sku_id
+            tests:
+              - relationships:
+                  to: source('PRACTICEPOC', 'hier_prod')
+                  field: sku_id
+          - name: fscldt_id
+            description: Foreign Key to hier_clnd_fscldt_id
+            tests:
+              - relationships:
+                  to: source('PRACTICEPOC', 'hier_clnd')
+                  field: fscldt_id
+          - name: price_substate_id
+            description: Foreign Key to hier_pricestate_substate_id
+            tests:
+              - relationships:
+                  to: source('PRACTICEPOC', 'hier_pricestate')
+                  field: substate_id
