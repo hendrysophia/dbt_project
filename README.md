@@ -80,17 +80,17 @@ Now that the data is staged to external Azure blob, used the COPY COMMAND to loa
 
    ![image](https://github.com/hendrysophia/dbt_project/assets/22212468/6ec86395-b4a8-465e-8ac6-d30b4d59117c)
 
-9. Ran tests for DBT models using **'dbt test'** command and dbt docs for the project is also generated using **'dbt docs generate'
-**
+9. Ran tests for DBT models using **'dbt test'** command and dbt docs for the project is also generated using **'dbt docs generate'**
+    
    https://wx587.us1.dbt.com/accounts/70403103919197/develop/70403103976353/docs/index.html#!/overview 
 
-11. Query the final aggregated table **(MVIEW_WEEKLY_SALES)** in snowflake
+10. Query the final aggregated table **(MVIEW_WEEKLY_SALES)** in snowflake
 
     ![image](https://github.com/hendrysophia/dbt_project/assets/22212468/e149374c-01f9-4a28-89a6-4ed8cfa22cca)
 
 **Code Repo:**
 
-All codes used for setting up snowflakes datapoints (DWH,DB,Schema,Tables) and Queries to validate all are available in the **"SNOWFLAKE_CODE" ** folder
+All codes used for setting up snowflakes datapoints (DWH,DB,Schema,Tables) and Queries to validate all are available in the **SNOWFLAKE_CODE** file
 
 And, for DBT its available in the respective folders of the repo.
 
